@@ -41,6 +41,7 @@ export default tseslint.config(
       'import/first': 'error', // Ensures all imports are at the top of the file
       'import/no-duplicates': 'error', // Prevents duplicate imports
       'import/newline-after-import': 'error', // Enforces a newline after import statements
+      '@typescript-eslint/no-explicit-any': 'warn',
       'import/order': [
         'error',
         {
