@@ -1,6 +1,6 @@
 // src/services/api-service.ts
 
-import axiosInstance from "../config/axios-instance";
+import axiosInstance from '../config/axios-instance';
 
 interface ApiResponse<T> {
   data: T;

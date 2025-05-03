@@ -20,4 +20,3 @@ export const ROUTES = {
   },
   // Add more modules here...
 };
-  

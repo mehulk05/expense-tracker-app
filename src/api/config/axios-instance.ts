@@ -11,28 +11,24 @@ const axiosInstance = axios.create({
 });
 
 // List of endpoints that DO NOT require token
-const excludeTokenUrls = [
-  '/auth',
-  '/signin',
-  '/signup',
-  '/forgot-password',
-];
+const excludeTokenUrls = ['/auth', '/signin', '/signup', '/forgot-password'];
 
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorageService.getItem('auth_token'); // or sessionStorage
+axiosInstance.interceptors.request.use(
+  config => {
+    const token = localStorageService.getItem('auth_token'); // or sessionStorage
 
-  // Check if the request should skip adding the token
-  const shouldSkip = excludeTokenUrls.some((url) =>
-    config.url?.includes(url)
-  );
+    // Check if the request should skip adding the token
+    const shouldSkip = excludeTokenUrls.some(url => config.url?.includes(url));
 
-  if (!shouldSkip && token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    if (!shouldSkip && token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
   }
-
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+);
 
 export default axiosInstance;

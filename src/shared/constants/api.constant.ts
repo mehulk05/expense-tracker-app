@@ -13,9 +13,8 @@ export const API = {
   },
   APPOINTMENT: {
     LIST: '/appointments',
-    detail: (id: string) => `/appointments/${id}`, 
+    detail: (id: string) => `/appointments/${id}`,
     getDetailPath: (id: string) => `/appointments/${id}`,
   },
   // Add more modules here...
 };
-  
