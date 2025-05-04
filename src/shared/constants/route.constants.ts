@@ -1,5 +1,7 @@
 // src/lib/constants/route.constants.ts
 
+// src/lib/constants/route.constants.ts
+
 export const ROUTES = {
   ROOT: '/',
   AUTH: {
@@ -11,6 +13,10 @@ export const ROUTES = {
   DASHBOARD: {
     BASE: '/dashboard',
     HOME: '/dashboard/home',
+    LOG_EXPENSE: '/dashboard/log-expense',
+    CATEGORIES: '/dashboard/categories',
+    PAYMENT_METHODS: '/dashboard/payment-methods',
+    BUDGET_GOALS: '/dashboard/budget-goals',
     SETTINGS: '/dashboard/settings',
   },
   USER: {
@@ -18,5 +24,4 @@ export const ROUTES = {
     PROFILE: '/user/profile',
     EDIT: '/user/edit',
   },
-  // Add more modules here...
 };

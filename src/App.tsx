@@ -4,6 +4,7 @@ import './App.css';
 import { AuthProvider } from './context/authProvider';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
+import Layout from './pages/Layout';
 import ProtectedRoute from './shared/component/ProtectedRoute';
 
 function App() {
@@ -17,10 +18,12 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <Layout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<Dashboard />} />
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>
