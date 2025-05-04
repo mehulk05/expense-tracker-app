@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Layout from './pages/Layout';
 import PaymentMethods from './pages/PaymentMethods';
 import ProtectedRoute from './shared/component/ProtectedRoute';
+import AddPaymentMethod from './pages/AddPaymentMethod';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           >
             <Route index element={<Dashboard />} />
             <Route path="/dashboard/payment-methods" element={<PaymentMethods />} />
+            <Route path="/dashboard/add-payment-method" element={<AddPaymentMethod />} />
           </Route>
         </Routes>
       </Router>
