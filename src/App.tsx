@@ -5,6 +5,7 @@ import { AuthProvider } from './context/authProvider';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import Layout from './pages/Layout';
+import PaymentMethods from './pages/PaymentMethods';
 import ProtectedRoute from './shared/component/ProtectedRoute';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
             }
           >
             <Route index element={<Dashboard />} />
+            <Route path="/dashboard/payment-methods" element={<PaymentMethods />} />
           </Route>
         </Routes>
       </Router>
