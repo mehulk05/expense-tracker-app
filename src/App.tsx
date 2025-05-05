@@ -2,12 +2,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 import './App.css';
 import { AuthProvider } from './context/authProvider';
+import AddPaymentMethod from './pages/AddPaymentMethod';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import Layout from './pages/Layout';
 import PaymentMethods from './pages/PaymentMethods';
 import ProtectedRoute from './shared/component/ProtectedRoute';
-import AddPaymentMethod from './pages/AddPaymentMethod';
 
 function App() {
   return (

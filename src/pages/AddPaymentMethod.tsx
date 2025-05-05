@@ -2,38 +2,20 @@ import { useState } from 'react';
 
 import { CreditCard, Landmark, Smartphone } from 'lucide-react';
 
-import CreditCardForm from '@/components/features/paymentmethod/forms/CreditCardForm';
-import DebitCardForm from '@/components/features/paymentmethod/forms/DebitCardForm';
-import UPIForm from '@/components/features/paymentmethod/forms/UPIForm';
+import AddPaymentForm from '@/components/features/payment-method/components/forms/AddPaymentForm';
+import { PaymentMethod } from '@/components/features/payment-method/interface/add-card.interface';
 
-type PaymentMethod = 'credit' | 'debit' | 'upi';
+const paymentMethods = [
+  { id: 'credit', title: 'Credit Card', icon: CreditCard },
+  { id: 'debit', title: 'Debit Card', icon: Landmark },
+  { id: 'upi', title: 'UPI', icon: Smartphone },
+];
 
 const AddPaymentMethod = () => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('credit');
 
-  const paymentMethods = [
-    {
-      id: 'credit',
-      title: 'Credit Card',
-      icon: CreditCard,
-      form: <CreditCardForm />,
-    },
-    {
-      id: 'debit',
-      title: 'Debit Card',
-      icon: Landmark,
-      form: <DebitCardForm />,
-    },
-    {
-      id: 'upi',
-      title: 'UPI',
-      icon: Smartphone,
-      form: <UPIForm />,
-    },
-  ];
-
   return (
-    <div className="">
+    <div>
       <div className="flex justify-between items-center py-8">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Add a Payment Method</h1>
       </div>
@@ -41,8 +23,9 @@ const AddPaymentMethod = () => {
         <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
           Select Payment Method
         </h1>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {paymentMethods.map((method) => (
+          {paymentMethods.map(method => (
             <button
               key={method.id}
               onClick={() => setSelectedMethod(method.id as PaymentMethod)}
@@ -72,9 +55,8 @@ const AddPaymentMethod = () => {
             </button>
           ))}
         </div>
-        <div className="mt-8">
-          {paymentMethods.find((method) => method.id === selectedMethod)?.form}
-        </div>
+
+        <div className="mt-8">{<AddPaymentForm method={selectedMethod} />}</div>
       </div>
     </div>
   );
