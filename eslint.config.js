@@ -37,7 +37,10 @@ export default tseslint.config(
 
       // formatting
       semi: ['error', 'always'],
-      indent: ['error', 2],
+      rules: {
+        indent: ['error', 2],
+        'prettier/prettier': ['error', { tabWidth: 2 }],
+      },
       'no-mixed-spaces-and-tabs': 'error',
 
       // import sorting - enhanced rules

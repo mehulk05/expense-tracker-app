@@ -27,6 +27,8 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="/dashboard/payment-methods" element={<PaymentMethods />} />
             <Route path="/dashboard/add-payment-method" element={<AddPaymentMethod />} />
+            <Route path="/dashboard/add-payment-method/:id" element={<AddPaymentMethod />} />
+
           </Route>
         </Routes>
       </Router>

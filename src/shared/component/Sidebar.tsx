@@ -10,6 +10,7 @@ import {
   Settings,
   Target,
   User,
+  X,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
@@ -21,12 +22,14 @@ const Sidebar: React.FC<{
   isOpen: boolean;
   isCollapsed: boolean;
   onCollapse: () => void;
+  toggleSidebar: () => void;
   userName?: string;
   userEmail?: string;
 }> = ({
   isOpen,
   isCollapsed,
   onCollapse,
+  toggleSidebar,
   userName = 'User Name',
   userEmail = 'user@example.com',
 }) => {
@@ -67,10 +70,19 @@ const Sidebar: React.FC<{
         {!isCollapsed && (
           <button
             onClick={onCollapse}
-            className="p-1 rounded-full hover:bg-indigo-50 hidden md:block"
+            className="p-1 rounded-full hover:bg-indigo-50 hidden sm:block"
             title="Collapse Sidebar"
           >
             <ChevronLeft size={20} className="text-indigo-600" />
+          </button>
+        )}
+
+        {isOpen && (
+          <button
+          onClick={toggleSidebar}
+          className="mr-4 p-2 rounded-full hover:bg-indigo-50 dark:hover:bg-indigo-900/30 md:hidden"
+        >
+          <X size={20} className="text-indigo-600 dark:text-indigo-400" />
           </button>
         )}
       </div>

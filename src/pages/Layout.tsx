@@ -19,10 +19,12 @@ const Layout = () => {
   const userName = currentUser?.displayName || 'User';
   const userEmail = currentUser?.email || 'user@example.com';
 
+  console.log(isSidebarOpen);
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-900 dark:to-indigo-950">
       <Sidebar
         isOpen={isSidebarOpen}
+        toggleSidebar={toggleSidebar}
         isCollapsed={isSidebarCollapsed}
         onCollapse={collapseSidebar}
         userName={userName}
@@ -39,10 +41,10 @@ const Layout = () => {
 
       <main
         className={`pt-20 transition-all duration-300 pr-5 pb-5 ${
-          isSidebarCollapsed ? 'md:pl-[90px]' : 'md:pl-[300px]'
+          isSidebarCollapsed ? 'pl-[70px]' : 'md:pl-[280px]'
         }`}
       >
-        <div className="">
+        <div className="pl-5">
           <Outlet />
         </div>
       </main>

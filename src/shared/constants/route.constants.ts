@@ -16,6 +16,7 @@ export const ROUTES = {
     LOG_EXPENSE: '/dashboard/log-expense',
     CATEGORIES: '/dashboard/categories',
     PAYMENT_METHODS: '/dashboard/payment-methods',
+    ADD_PAYMENT_METHOD: '/dashboard/add-payment-method',
     BUDGET_GOALS: '/dashboard/budget-goals',
     SETTINGS: '/dashboard/settings',
   },
