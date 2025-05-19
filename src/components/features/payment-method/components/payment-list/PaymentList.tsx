@@ -10,12 +10,12 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-import { IPaymentList } from '../payment-method/interface/add-card.interface';
+import { IPaymentList } from '../../interface/add-card.interface';
 import { IFirebaseTimeStamp } from '@/shared/interfaces/firebase-timestamp.interface';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/shared/constants/route.constants';
 
-const PaymentList = ({ payments }: { payments: IPaymentList[] }) => {
+const PaymentList = ({ payments, onDeletePaymentMethod }: { payments: IPaymentList[], onDeletePaymentMethod: (id: string) => void }) => {
   const navigate = useNavigate();
 
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -78,6 +78,7 @@ const PaymentList = ({ payments }: { payments: IPaymentList[] }) => {
     e.stopPropagation();
     console.log('Delete payment method:', id);
     setActiveMenu(null);
+    onDeletePaymentMethod(id);
   };
 
   // Toggle action menu

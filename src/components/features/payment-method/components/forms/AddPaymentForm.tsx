@@ -9,7 +9,6 @@ import {
   paymentMethodFormSchema,
   PaymentMethodFormValues,
 } from '../../validators/add-payment-form.validator';
-import { addCardInfo, getPaymentMethodById, updateCardInfo } from '../services/add-card.service';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -24,6 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from '@/shared/constants/route.constants';
+import { addPaymentMethod, getPaymentMethodById, updatePaymentMethod } from '../services/payment-method.service';
 
 interface Props {
   method: 'upi' | 'credit' | 'debit';
@@ -35,7 +35,6 @@ const AddPaymentForm: React.FC<Props> = ({ method }) => {
   const { id } = useParams(); // Get paymentId from URL params
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paymentData, setPaymentData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Set appropriate default values based on payment method
@@ -69,7 +68,6 @@ const AddPaymentForm: React.FC<Props> = ({ method }) => {
       console.log('inside edit');
       try {
         const data = await getPaymentMethodById(currentUser.uid, id);
-        setPaymentData(data);
         
         // Populate form with fetched data
         if (data) {
@@ -108,10 +106,10 @@ const AddPaymentForm: React.FC<Props> = ({ method }) => {
        // Use separate functions for add vs edit
        if (id) {
         // If we have a paymentId, use the update function
-        await updateCardInfo(currentUser.uid, id, values);
+        await updatePaymentMethod(currentUser.uid, id, values);
       } else {
         // For new payment methods, use the add function
-        await addCardInfo(currentUser.uid, values);
+        await addPaymentMethod(currentUser.uid, values);
       }
       
       form.reset(defaultValues);

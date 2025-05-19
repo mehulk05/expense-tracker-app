@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-import { getDocs, collection, doc } from 'firebase/firestore';
 import { CreditCard, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import PaymentList from '@/components/features/payment-list/PaymentList';
+import PaymentList from '@/components/features/payment-method/components/payment-list/PaymentList';
 import { IPaymentList } from '@/components/features/payment-method/interface/add-card.interface';
 import { Button } from '@/components/ui/button';
-import { db } from '@/firebase';
 import { useAuth } from '@/hooks/useAuth';
+import DeleteConfirmation from '@/shared/component/DeleteConfirmation';
+import { deletePaymentMethod, getPaymentMethodByUserId } from '@/components/features/payment-method/components/services/payment-method.service';
 
 // Get payments filtered by active tab
 const getFilteredPayments = (payments: IPaymentList[], activeTab: string) => {
@@ -17,46 +17,38 @@ const getFilteredPayments = (payments: IPaymentList[], activeTab: string) => {
 };
 
 
-const PaymentMethods = () => {
+const PaymentMethodContainer = () => {
   const { currentUser } = useAuth();
   const [isLoading, setIsLoading] = useState(true); // Start with true
 
   const navigate = useNavigate();
   const [payments, setPayments] = useState<IPaymentList[]>([]);
   const [activeTab, setActiveTab] = useState('all');
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const uid = currentUser?.uid;
 
-  useEffect(() => {
-    const fetchPayments = async () => {
-      if (!uid) return;
+  const fetchPayments = useCallback(async () => {
+    if (!uid) return;
 
-      try {
-        setIsLoading(true); // Start loading
+    try {
+      setIsLoading(true); // Start loading
 
-        const userDocRef = doc(db, 'users', uid);
-
-        const cardsRef = collection(userDocRef, 'cards'); // ✅ Now it's correct
-        const querySnapshot = await getDocs(cardsRef);
-
-        const data: IPaymentList[] = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as unknown as IPaymentList[];
-
-        console.log('Fetched Payment Methods:', data);
-        setPayments(data);
-      } catch (error) {
-        console.error('Error fetching payment methods:', error);
-      } finally {
-        setIsLoading(false); // Stop loading regardless of success or error
-      }
-    };
-
-    if (uid) {
-      fetchPayments();
+      const res = await getPaymentMethodByUserId(uid);
+      setPayments(res);
+    } catch (error) {
+      console.error('Error fetching payment methods:', error);
+    } finally {
+      setIsLoading(false); // Stop loading regardless of success or error
     }
   }, [uid]);
+
+  useEffect(() => {
+      fetchPayments();
+  }, [fetchPayments]);
+
 
 
 
@@ -86,11 +78,36 @@ const PaymentMethods = () => {
     </div>
   );
 
+  const handleDeletePaymentMethod = (id: string) => {
+    setSelectedPaymentMethod(id);
+    setShowDeleteConfirmation(true);
+  };
 
+  const closeDeleteConfirmation = () => {
+    setShowDeleteConfirmation(false);
+    setSelectedPaymentMethod(null)
+  };
 
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    if (currentUser?.uid && selectedPaymentMethod) {
+      try {
+        await deletePaymentMethod(currentUser.uid, selectedPaymentMethod);
+        setShowDeleteConfirmation(false);
+        
+        // Call the success callback if provided
+        fetchPayments();
+
+      } catch (err) {
+        console.error('Error deleting payment method:', err);
+      
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
+  
   const filteredPayments = getFilteredPayments(payments, activeTab);
-
-
 
   return (
 
@@ -156,12 +173,23 @@ const PaymentMethods = () => {
         ) : filteredPayments.length === 0 ? (
           <EmptyState />
         ) : (
-          <PaymentList payments={filteredPayments} />
+          <PaymentList payments={filteredPayments} onDeletePaymentMethod={handleDeletePaymentMethod} />
         )}
       </div>
+
+
+       {/* Delete Confirmation Dialog */}
+       <DeleteConfirmation
+        isOpen={showDeleteConfirmation}
+        title='Delete Payment Method'
+        message='Are you sure you want to delete this payment method?'
+        isDeleting={isDeleting}
+        onClose={closeDeleteConfirmation}
+        onConfirm={confirmDelete}
+      />
     </>
 
   );
 };
 
-export default PaymentMethods;
+export default PaymentMethodContainer;
