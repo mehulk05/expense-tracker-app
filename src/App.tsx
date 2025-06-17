@@ -10,6 +10,7 @@ import PaymentMethodContainer from './pages/PaymentMethodContainer';
 import ProtectedRoute from './shared/component/ProtectedRoute';
 import CategoriesContainer from './pages/CategoriesContainer';
 import AddCategory from './pages/AddCategory';
+import BudgetGoalContainer from './pages/BudgetGoalsContainer';
 
 function App() {
   return (
@@ -28,13 +29,12 @@ function App() {
           >
             <Route index element={<Dashboard />} />
             <Route path="/dashboard/category-list" element={<CategoriesContainer />} />
-             {/* <Route path="/dashboard/add-category" element={<AddCategoryModalUI />} /> */}
-             <Route path="/dashboard/add-category" element={<AddCategory />} />
-             <Route path="/dashboard/add-category/:categoryId" element={<AddCategory />} />
+            <Route path="/dashboard/add-category" element={<AddCategory />} />
+            <Route path="/dashboard/add-category/:categoryId" element={<AddCategory />} />
             <Route path="/dashboard/payment-methods" element={<PaymentMethodContainer />} />
             <Route path="/dashboard/add-payment-method" element={<AddPaymentMethod />} />
             <Route path="/dashboard/add-payment-method/:id" element={<AddPaymentMethod />} />
-
+            <Route path="/dashboard/budget-goals" element={<BudgetGoalContainer />} />
           </Route>
         </Routes>
       </Router>
