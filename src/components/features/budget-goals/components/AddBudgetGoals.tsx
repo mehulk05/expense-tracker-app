@@ -1,38 +1,54 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X, Target, Calendar, DollarSign } from 'lucide-react';
 import { IBudgetGoal } from '../interface/budget-goals.interface';
 import { ICategory } from '../../category/interface/category-list.interface';
 import { getCategoriesByUserId } from '../../category/services/category.service';
 import { useAuth } from '@/hooks/useAuth';
+import { addBudgetGoals } from '../services/budget-goals.service';
+import { IAddBudgetGoalsProps } from '../interface/add-budget-goals.interface';
+import toast from 'react-hot-toast';
 
 interface AddBudgetUIProps {
   onCreateBudget?: () => void;
   budgetToEdit: IBudgetGoal | null;
 }
 
-const AddBudgetUI = ({ onCreateBudget, budgetToEdit = null } : AddBudgetUIProps) => {
-
-  const {currentUser} = useAuth();
+const AddBudgetUI = ({ onCreateBudget, budgetToEdit = null }: AddBudgetUIProps) => {
+  const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('custom');
-  const [targetAmount, setTargetAmount] = useState('');
+  const [targetAmount, setTargetAmount] = useState(0);
   const [deadline, setDeadline] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [allCategories, setAllCategories] = useState<ICategory[]>([]); 
+  const [allCategories, setAllCategories] = useState<ICategory[]>([]);
+
+  const dateInputRef = useRef<null | HTMLInputElement>(null);
+
+  const handleDateClick = () => {
+    if (dateInputRef.current) {
+      // Try showPicker if supported
+      if (typeof dateInputRef.current.showPicker === 'function') {
+        dateInputRef.current.showPicker();
+      } else {
+        dateInputRef.current.focus();
+        dateInputRef.current.click();
+      }
+    }
+  };
 
   // Initialize form with budget data if in edit mode
   useEffect(() => {
     if (budgetToEdit) {
-      setTargetAmount(budgetToEdit.targetAmount?.toString() || '');
-      setDeadline(budgetToEdit.deadline.toISOString() || '');
+      setTargetAmount(budgetToEdit.targetAmount || 0);
+      setDeadline(budgetToEdit.deadline.toString() || '');
       setSelectedCategory(budgetToEdit.category || null);
       setActiveTab('custom');
     }
   }, [budgetToEdit]);
 
   const handleCreateBudget = async () => {
-    if (!targetAmount.trim() || !deadline || !selectedCategory) {
+    if (targetAmount <= 0 || !deadline || !selectedCategory) {
       setError('Please fill in all required fields');
       return;
     }
@@ -41,14 +57,23 @@ const AddBudgetUI = ({ onCreateBudget, budgetToEdit = null } : AddBudgetUIProps)
     setError('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!currentUser) return;
+      const budgetData: IAddBudgetGoalsProps = {
+        targetAmount,
+        currentAmount: 0,
+        deadline: new Date(deadline),
+        categoryId: selectedCategory.id,
+        status: 'active',
+      };
+      await addBudgetGoals(currentUser?.uid, budgetData);
       
+      toast.success("Successfull added Budget Goal!")
+
       // Reset form
-      setTargetAmount('');
+      setTargetAmount(0);
       setDeadline('');
       setSelectedCategory(null);
-      
+
       if (onCreateBudget) {
         onCreateBudget();
       }
@@ -59,20 +84,15 @@ const AddBudgetUI = ({ onCreateBudget, budgetToEdit = null } : AddBudgetUIProps)
     }
   };
 
+  useEffect(() => {
+    const fetchAllCategories = async () => {
+      if (!currentUser) return;
+      const categories = await getCategoriesByUserId(currentUser.uid);
+      setAllCategories(categories);
+    };
 
-  useEffect(()=>{
-
-    const fetchAllCategories = async()=>{
-        if(!currentUser) return
-        const categories = await getCategoriesByUserId(currentUser.uid)
-        setAllCategories(categories)
-    }
-
-    fetchAllCategories()
-
-
-
-  }, [])
+    fetchAllCategories();
+  }, []);
 
   return (
     <div className="">
@@ -102,36 +122,35 @@ const AddBudgetUI = ({ onCreateBudget, budgetToEdit = null } : AddBudgetUIProps)
                     placeholder="Enter target amount"
                     className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 shadow-sm"
                     value={targetAmount}
-                    onChange={e => setTargetAmount(e.target.value)}
+                    onChange={e => setTargetAmount(Number(e.target.value))}
                   />
                 </div>
               </div>
-   
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Deadline <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="date"
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 shadow-sm"
-                  value={deadline}
-                  onChange={e => setDeadline(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Deadline <span className="text-red-500">*</span>
+                </label>
+                <div className="relative hover:cursor-pointer" onClick={handleDateClick}>
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="date"
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 shadow-sm"
+                    value={deadline}
+                    onChange={e => setDeadline(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    ref={dateInputRef}
+                  />
+                </div>
               </div>
             </div>
-
-            </div>
-
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Choose Category <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 p-4 border border-gray-200 rounded-lg bg-gray-50 shadow-inner max-h-80 overflow-y-auto">
-                {allCategories.map((category) => (
+                {allCategories.map(category => (
                   <div
                     key={category.id}
                     className={`flex flex-col items-center p-3 rounded-lg cursor-pointer transition-all duration-200 ${
@@ -141,7 +160,9 @@ const AddBudgetUI = ({ onCreateBudget, budgetToEdit = null } : AddBudgetUIProps)
                     }`}
                     onClick={() => setSelectedCategory(category)}
                   >
-                    <div className={`w-12 h-12 rounded-full ${category.color} flex items-center justify-center text-white text-xl mb-2`}>
+                    <div
+                      className={`w-12 h-12 rounded-full ${category.color} flex items-center justify-center text-white text-xl mb-2`}
+                    >
                       {category.icon}
                     </div>
                     <span className="text-xs font-medium text-gray-700 text-center">
@@ -152,14 +173,14 @@ const AddBudgetUI = ({ onCreateBudget, budgetToEdit = null } : AddBudgetUIProps)
               </div>
             </div>
 
-        
-
             {/* Preview */}
             <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
               <p className="text-sm text-gray-500 mb-3 font-medium">Preview:</p>
               <div className="flex items-center space-x-4">
                 {selectedCategory && (
-                  <div className={`w-16 h-16 rounded-full ${selectedCategory.color} flex items-center justify-center text-white text-2xl shadow-md`}>
+                  <div
+                    className={`w-16 h-16 rounded-full ${selectedCategory.color} flex items-center justify-center text-white text-2xl shadow-md`}
+                  >
                     {selectedCategory.icon}
                   </div>
                 )}
@@ -168,7 +189,8 @@ const AddBudgetUI = ({ onCreateBudget, budgetToEdit = null } : AddBudgetUIProps)
                     {selectedCategory?.name || 'Select Category'} Goal
                   </h3>
                   <p className="text-gray-600">
-                    Target: ${targetAmount || '0'} {deadline && `by ${new Date(deadline).toLocaleDateString()}`}
+                    Target: ${targetAmount || '0'}{' '}
+                    {deadline && `by ${new Date(deadline).toLocaleDateString()}`}
                   </p>
                 </div>
               </div>
@@ -187,12 +209,12 @@ const AddBudgetUI = ({ onCreateBudget, budgetToEdit = null } : AddBudgetUIProps)
                   ? 'hover:bg-indigo-700 hover:shadow-lg transform hover:-translate-y-0.5'
                   : ''
               } ${
-                !targetAmount.trim() || !deadline || !selectedCategory || isSubmitting
+                !targetAmount || !deadline || !selectedCategory || isSubmitting
                   ? 'opacity-50 cursor-not-allowed'
                   : ''
               }`}
               onClick={handleCreateBudget}
-              disabled={!targetAmount.trim() || !deadline || !selectedCategory || isSubmitting}
+              disabled={!targetAmount || !deadline || !selectedCategory || isSubmitting}
             >
               {isSubmitting ? (
                 <>
@@ -217,14 +239,14 @@ const AddBudgetUI = ({ onCreateBudget, budgetToEdit = null } : AddBudgetUIProps)
                     ></path>
                   </svg>
                   <span className="font-medium">
-                    {budgetToEdit ? "Updating..." : "Creating..."}
+                    {budgetToEdit ? 'Updating...' : 'Creating...'}
                   </span>
                 </>
               ) : (
                 <>
                   <Target className="h-5 w-5 mr-2" />
                   <span className="font-medium">
-                    {budgetToEdit ? "Update Budget Goal" : "Create Budget Goal"}
+                    {budgetToEdit ? 'Update Budget Goal' : 'Create Budget Goal'}
                   </span>
                 </>
               )}

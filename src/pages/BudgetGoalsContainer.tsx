@@ -4,14 +4,17 @@ import {
   Search, Edit, Loader, Trash,} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { IBudgetGoal } from '@/components/features/budget-goals/interface/budget-goals.interface';
-import { dummyGoals } from '@/components/features/budget-goals/constants/budget-goals-list.constants';
 import DeleteConfirmation from '@/shared/component/DeleteConfirmation';
+import { getBudgetGoalsByUserId } from '@/components/features/budget-goals/services/budget-goals.service';
+import { useAuth } from '@/hooks/useAuth';
+import { format } from 'date-fns';
 
 const BudgetGoalContainer = () => {
   const navigate = useNavigate();
+  const {currentUser} = useAuth()
   
-  const [budgetGoals, setBudgetGoals] = useState<IBudgetGoal[]>(dummyGoals);
-  const [filteredGoals, setFilteredGoals] = useState<IBudgetGoal[]>(dummyGoals);
+  const [budgetGoals, setBudgetGoals] = useState<IBudgetGoal[]>([]);
+  const [filteredGoals, setFilteredGoals] = useState<IBudgetGoal[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +33,16 @@ const BudgetGoalContainer = () => {
       setFilteredGoals(filtered);
     }
   }, [searchQuery, budgetGoals]);
+
+const fetchAllBudgetGoals = async ()=>{
+  if(!currentUser) return
+    const data = await getBudgetGoalsByUserId(currentUser?.uid)
+    setBudgetGoals(data)
+}
+
+  useEffect(()=>{
+fetchAllBudgetGoals()
+  }, [])
 
   const handleDeleteGoal = (goal: IBudgetGoal) => {
     setShowDeleteConfirmation(true);
@@ -69,19 +82,29 @@ const BudgetGoalContainer = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | undefined | null) => {
+    if (amount === undefined || amount === null || isNaN(amount)) {
+      return '$0.00';
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount);
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+  const formatDate = (date: any) => {
+    if (!date) return 'N/A';
+    // Handle Firestore Timestamp
+    if (date.toDate) {
+      return format(date.toDate(), 'MMM d, yyyy');
+    }
+    // Handle regular Date object
+    if (date instanceof Date) {
+      return format(date, 'MMM d, yyyy');
+    }
+    return 'Invalid Date';
   };
 
   // Skeleton loader for budget goals
@@ -242,7 +265,7 @@ const BudgetGoalContainer = () => {
                             </div>
                             <div className="flex items-center space-x-1 text-gray-600">
                               <TrendingUp className="w-4 h-4" />
-                              <span>Budget: {formatCurrency(goal.category.budget)}</span>
+                              <span>Budget: {formatCurrency(goal.category?.budget)}</span>
                             </div>
                           </div>
                         </div>
