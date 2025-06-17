@@ -11,6 +11,7 @@ import ProtectedRoute from './shared/component/ProtectedRoute';
 import CategoriesContainer from './pages/CategoriesContainer';
 import AddCategory from './pages/AddCategory';
 import BudgetGoalContainer from './pages/BudgetGoalsContainer';
+import AddBudgetGoal from './pages/AddBudgetGoal';
 
 function App() {
   return (
@@ -35,6 +36,8 @@ function App() {
             <Route path="/dashboard/add-payment-method" element={<AddPaymentMethod />} />
             <Route path="/dashboard/add-payment-method/:id" element={<AddPaymentMethod />} />
             <Route path="/dashboard/budget-goals" element={<BudgetGoalContainer />} />
+            <Route path="/dashboard/add-budget-goal" element={<AddBudgetGoal />} />
+            {/* add-budget-goal */}
           </Route>
         </Routes>
       </Router>
