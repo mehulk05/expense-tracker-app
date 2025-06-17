@@ -70,7 +70,14 @@ export const deleteCategory = async (userId: string, categoryId: string) => {
 // Add this to your category.service.ts file
 export const updateCategory = async (userId: string, categoryId: string, categoryData: Partial<ICategory>) => {
   try {
-    const categoryRef = doc(db, 'users', userId, 'categories', categoryId);
+    const categoryRef = doc(db, 'categories', categoryId);
+    
+    // First check if the category belongs to the user
+    const categoryDoc = await getDoc(categoryRef);
+    if (!categoryDoc.exists() || categoryDoc.data().userId !== userId) {
+      throw new Error('Category not found or does not belong to the user');
+    }
+    
     await updateDoc(categoryRef, {
       ...categoryData,
       updatedAt: serverTimestamp()
@@ -78,6 +85,38 @@ export const updateCategory = async (userId: string, categoryId: string, categor
     return true;
   } catch (error) {
     console.error('Error updating category:', error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves a single category by its ID for a specific user
+ * @param {string} userId - The user's ID
+ * @param {string} categoryId - The category ID to retrieve
+ * @returns {Promise<ICategory | null>} - The category object or null if not found
+ */
+export const getCategoryById = async (userId: string, categoryId: string): Promise<ICategory | null> => {
+  try {
+    const categoryDocRef = doc(db, 'categories', categoryId);
+    const categoryDoc = await getDoc(categoryDocRef);
+    
+    if (!categoryDoc.exists()) {
+      return null;
+    }
+    
+    const categoryData = categoryDoc.data();
+    
+    // Check if the category belongs to the user
+    if (categoryData.userId !== userId) {
+      throw new Error('Category not found or does not belong to the user');
+    }
+    
+    return {
+      id: categoryDoc.id,
+      ...categoryData
+    } as ICategory;
+  } catch (error) {
+    console.error('Error fetching category by ID:', error);
     throw error;
   }
 };

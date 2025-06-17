@@ -65,7 +65,6 @@ const AddPaymentForm: React.FC<Props> = ({ method }) => {
       
       setIsLoading(true);
       setError(null);
-      console.log('inside edit');
       try {
         const data = await getPaymentMethodById(currentUser.uid, id);
         

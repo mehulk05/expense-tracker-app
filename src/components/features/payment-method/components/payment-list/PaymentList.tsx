@@ -76,7 +76,6 @@ const PaymentList = ({ payments, onDeletePaymentMethod }: { payments: IPaymentLi
   // Handle delete payment method
   const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('Delete payment method:', id);
     setActiveMenu(null);
     onDeletePaymentMethod(id);
   };

@@ -19,7 +19,6 @@ const Layout = () => {
   const userName = currentUser?.displayName || 'User';
   const userEmail = currentUser?.email || 'user@example.com';
 
-  console.log(isSidebarOpen);
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-900 dark:to-indigo-950">
       <Sidebar

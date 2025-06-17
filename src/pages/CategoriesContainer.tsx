@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react';
 import { 
-  Plus, X, Check, ChevronRight, ShoppingBag, Utensils, Car, Film, 
-  Receipt, Stethoscope, Plane, GraduationCap, Search, MoreVertical, Edit,
+  Plus, ShoppingBag, Utensils, Car, Film, 
+  Receipt, Stethoscope, Plane, GraduationCap, Search, Edit,
   Loader,
   Trash
 } from 'lucide-react';
-import AddCategoryModalUI from '@/components/features/category/components/AddCategory';
 import { ICategory } from '@/components/features/category/interface/category-list.interface';
 import { deleteCategory, getCategoriesByUserId } from '@/components/features/category/services/category.service';
 import { useAuth } from '@/hooks/useAuth';
 import DeleteConfirmation from '@/shared/component/DeleteConfirmation';
+import { useNavigate } from 'react-router-dom';
 
 const CategoriesContainer = () => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate()
   
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<ICategory[]>([]);
 
@@ -103,25 +103,7 @@ const CategoriesContainer = () => {
     const iconObj = iconOptions.find(opt => opt.id === iconId);
     return iconObj ? iconObj.icon : <ShoppingBag size={24} />;
   };
-  
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedCategory(null);
 
-  }
-
-  const handleCreateCategory = () => {
-    setIsModalOpen(false);
-    fetchCategories();
-    setSelectedCategory(null);
-
-  }
-
-
-  const handleEditCategory = (category: ICategory) => {
-    setSelectedCategory(category);
-    setIsModalOpen(true);
-  };
     // Skeleton loader for categories
   const CategorySkeleton = () => (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
@@ -169,7 +151,7 @@ const CategoriesContainer = () => {
           />
         </div>
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => navigate("/dashboard/add-category")}
           className="inline-flex items-center px-5 py-2.5 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors focus:ring-4 focus:ring-indigo-300"
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -225,7 +207,7 @@ const CategoriesContainer = () => {
                       </div>
                       <div className="flex space-x-2">
                         <button
-                        onClick={() => handleEditCategory(category)} 
+                        onClick={() => navigate(`/dashboard/add-category/${category.id}`)} 
                         className="p-1.5 cursor-pointer rounded-full text-gray-400 hover:text-indigo-600 hover:bg-gray-100">
                           <Edit size={18} />
                         </button>
@@ -250,7 +232,7 @@ const CategoriesContainer = () => {
                     : "You don't have any categories yet. Create your first category to get started."}
                 </p>
                 <button 
-                  onClick={() => {setIsModalOpen(true); setSearchQuery('');setSelectedCategory(null);}}
+                  onClick={() => {navigate("/dashboard/add-category"); setSearchQuery('');setSelectedCategory(null);}}
                   className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700"
                 >
                   <Plus className="w-5 h-5 mr-2" />
@@ -261,21 +243,6 @@ const CategoriesContainer = () => {
           </>
         )}
       </main>
-      
-      {/* Add Category Modal with enhanced UI */}
-      {isModalOpen && (
-        <div className="fixed inset-1 bg-transparent bg-opacity-20 backdrop-blur-sm  p-4 z-50">
-         <div className="flex items-start mt-20 justify-center p-4 z-50">
-
-          <AddCategoryModalUI
-            onModalClose={handleModalClose}
-            onCreateCategory={handleCreateCategory}
-            categoryToEdit={selectedCategory}
-
-          />
-        </div>
-        </div>
-      )}
     </div>
 
       {showDeleteConfirmation && (

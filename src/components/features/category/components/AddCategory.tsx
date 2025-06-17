@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Plus, Check, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Plus, Check, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 import {
@@ -7,28 +7,25 @@ import {
   categoryIcons,
   predefinedCategories,
 } from '../constants/add-category.constant';
-import { addCategory } from '../services/category.service';
+import { addCategory, updateCategory } from '../services/category.service';
 import { ICategory } from '../interface/category-list.interface';
+import toast from 'react-hot-toast';
 
-interface AddCategoryModalUIProps {
-  onModalClose: () => void;
+interface AddCategoryUIProps {
   onCreateCategory: () => void;
   categoryToEdit?: ICategory | null;
-
 }
 
-const AddCategoryModalUI = ({
-  onModalClose,
+const AddCategoryUI = ({
   onCreateCategory,
     categoryToEdit = null,
 
-}: AddCategoryModalUIProps) => {
+}: AddCategoryUIProps) => {
   const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('custom'); // 'custom' or 'predefined'
   const [categoryName, setCategoryName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('💰');
   const [selectedColor, setSelectedColor] = useState(colorOptions[0]);
-  const [showSuccess, setShowSuccess] = useState(false);
   const [selectedPredefined, setSelectedPredefined] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -68,13 +65,15 @@ const AddCategoryModalUI = ({
       }
 
       if (currentUser?.uid) {
-        await addCategory(currentUser.uid, categoryData);
+        if(categoryToEdit){ 
+          await updateCategory(currentUser.uid, categoryToEdit.id, categoryData)
+        }else{
+          await addCategory(currentUser.uid, categoryData);
+        }
       } else {
         throw new Error('User not authenticated');
       }
-
-      // Show success message
-      setShowSuccess(true);
+      toast.success(categoryToEdit ? "Succesfully Category Updated" : "Successfully Category Added")
       setSelectedColor(colorOptions[0]);
       setSelectedPredefined(null);
       onCreateCategory();
@@ -87,17 +86,14 @@ const AddCategoryModalUI = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100">
-      {/* Header - Made smaller for better mobile fit */}
-      <div className="relative bg-gradient-to-r from-indigo-800 via-purple-700 to-indigo-800 py-5 px-4">
-        <button onClick={onModalClose} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/10 p-2 rounded-full transition-all duration-200">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <h1 className="text-xl font-bold text-white text-center tracking-wide">
-                    {categoryToEdit ? 'Edit Category' : 'Add Category'}
-
-        </h1>
-      </div>
+    <div className="">
+       <header className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+        <div className="mx-auto px-6 py-8">
+          <div className="flex flex-col space-y-4">
+            <h1 className="text-3xl font-bold">Add a Category</h1>
+          </div>
+        </div>
+      </header>
 
       {!categoryToEdit && (
       <div className="flex border-b border-gray-200 bg-gray-50">
@@ -125,19 +121,11 @@ const AddCategoryModalUI = ({
       )}
       
 
-      {/* Success Message */}
-      {showSuccess && (
-        <div className="fixed top-16 left-0 right-0 mx-auto w-4/5 bg-emerald-100 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg shadow-lg flex items-center justify-center transition-all duration-300 z-20 animate-pulse">
-          <Check className="h-5 w-5 mr-2 text-emerald-600" />
-            {categoryToEdit ? 'Category successfully updated!' : 'Category successfully added!'}
-        </div>
-      )}
-
       {/* Content Area - Made more compact */}
       <div className="p-5">
         {activeTab === 'custom' || categoryToEdit ? (
           /* Custom Category Form */
-          <div className="space-y-4  max-h-100 overflow-y-auto">
+          <div className="space-y-4 overflow-y-auto">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
               <input
@@ -234,12 +222,12 @@ const AddCategoryModalUI = ({
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    <span className="font-medium">Creating...</span>
+                    <span className="font-medium">{categoryToEdit ? "Updating..." : "Creating..."}</span>
                   </>
                 ) : (
                   <>
                     <Plus className="h-5 w-5 mr-2" />
-                    <span className="font-medium">Create Category</span>
+                    <span className="font-medium"> {categoryToEdit ? "Update Category" : "Create Category"} </span>
                   </>
                 )}
               </button>
@@ -252,11 +240,11 @@ const AddCategoryModalUI = ({
               Select a predefined category to add to your expense tracker:
             </p>
 
-            <div className="space-y-3 max-h-80 overflow-y-auto pr-1 pt-1">
+            <div className="space-y-3 overflow-y-auto pr-1 pt-1">
               {predefinedCategories.map((category, index) => (
                 <div
                   key={index}
-                  className={`flex items-center space-x-4 p-3 border rounded-lg cursor-pointer transition-all duration-300 ${
+                  className={`flex items-center w-[90%] mx-auto space-x-4 p-3 border rounded-lg cursor-pointer transition-all duration-300 ${
                     selectedPredefined === category
                       ? `${category.color} border-2 transform scale-102 shadow-md`
                       : 'border-gray-200 hover:border-gray-300 bg-white hover:shadow-sm'
@@ -316,7 +304,7 @@ const AddCategoryModalUI = ({
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  <span className="font-medium">Adding...</span>
+                  <span className="font-medium"> Adding...</span>
                 </>
               ) : (
                 <>
@@ -339,4 +327,4 @@ const AddCategoryModalUI = ({
   );
 };
 
-export default AddCategoryModalUI;
+export default AddCategoryUI;
